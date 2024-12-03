@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag-and-Drop Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background-image:url('./background-boy-2.png');
+            background-size:cover;
+            background-position:center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0px;
+            min-height: 100vh;
+        }
+        .title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .row {
+            width:300px;
+            display: flex;
+            flex-wrap:wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            min-height: 50px;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+        }
+        .word {
+            padding: 10px 20px;
+            background-color: #993333;
+            color: white;
+            border-radius: 5px;
+            cursor: grab;
+        }
+        .word:active {
+            cursor: grabbing;
+        }
+        .hidden {
+            display: none;
+        }
+        .button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <h2 class="title">Бэрээдэгинэн сааһылаа</h2>
+
+        <div id="row_1" class="row"></div>
+
+        <div id="row_2" class="row"></div>
+
+        
+        <button id="nextButton" class="button hidden">Салгыы</button>
+        
+        <h3 id="result" class="hidden"></h3>
+
+    </div>
+
+    <script>
+        const tasks = [
+            {
+                shuffle: ['көрүҥ', 'абабын', 'эрэ'],
+                sentence: ['абабын', 'көрүҥ', 'эрэ']
+            },
+            {
+                shuffle: ['туйаҕын', 'хатарбыт', 'аҕатын'],
+                sentence: ['аҕатын', 'туйаҕын', 'хатарбыт']
+            },
+            {
+                shuffle: ['буолбат', 'хам', 'айаҕа'],
+                sentence: ['айаҕа', 'хам', 'буолбат']
+            },
+            {
+                shuffle: ['охтор', 'үрдүн', 'айах'],
+                sentence: ['айах', 'үрдүн', 'охтор']
+            },
+            {
+                shuffle:['буоллун', 'айылааҕын', 'оннук'],
+                sentence:['айылааҕын', 'оннук', 'буоллун']
+            },
+            {
+                shuffle:['буол', 'сыҥаах', 'аллараа'],
+                sentence:['аллараа', 'сыҥаах', 'буол']
+            },
+            {
+                shuffle:['эттэххэ', 'кистээбэккэ', 'аньыыны'],
+                sentence:['аньыыны', 'кистээбэккэ', 'эттэххэ']
+            },
+            {
+                shuffle:['суоҕа', 'тахсыа', 'ас'],
+                sentence:['ас', 'тахсыа', 'суоҕа']
+            },
+            {
+                shuffle:['ас', 'аһаа', 'үрдүн'],
+                sentence:['ас', 'үрдүн', 'аһаа']
+            },
+            {
+                shuffle:['иһитигэр', 'холлор', 'аһаабыт'],
+                sentence:['аһаабыт', 'иһитигэр', 'холлор']
+            },
+            {
+                shuffle:['уурар', 'оллооннуу', 'атаҕын'],
+                sentence:['атаҕын', 'оллооннуу', 'уурар']
+            },
+            {
+                shuffle:['тириитэ', 'баранна', 'атах'],
+                sentence:['атах', 'тириитэ', 'баранна']
+            },
+            {
+                shuffle:['миин', 'гынан', 'ат'],
+                sentence:['ат', 'гынан', 'миин']
+            },
+            {
+                shuffle:['биэттэн', 'төрөөбөтөхпүт', 'аттан'],
+                sentence:['аттан', 'биэттэн', 'төрөөбөтөхпүт']
+            },
+            {
+                shuffle:['биэримэ', 'түһэн', 'ааккын'],
+                sentence:['ааккын', 'түһэн', 'биэримэ']
+            },
+            {
+                shuffle:['дойдуну', 'аан', 'хастаа'],
+                sentence:['аан', 'дойдуну', 'хастаа']
+            },
+            {
+                shuffle:['суола', 'аарыктаах', 'айан'],
+                sentence:['аарыктаах', 'айан', 'суола']
+            },
+            {
+                shuffle:['былыт', 'ааһар', 'албына'],
+                sentence:['ааһар', 'былыт', 'албына']
+            },
+            {
+                shuffle:['харата', 'аат', 'эрэ'],
+                sentence:['аат', 'эрэ', 'харата']
+            },
+            {
+                shuffle:['буола', 'билбэт', 'аатын'],
+                sentence:['аатын', 'билбэт', 'буола']
+            },
+        ];
+
+        let currentLevel = 0;
+        let correctAnswers = 0;
+
+        const row1 = document.getElementById('row_1');
+        const row2 = document.getElementById('row_2');
+        const nextButton = document.getElementById('nextButton');
+        const result = document.getElementById('result');
+
+        function loadLevel(level) {
+            row1.innerHTML = '';
+            row2.innerHTML = '';
+
+            const task = tasks[level];
+            task.shuffle.forEach((word) => {
+                const wordElement = document.createElement('div');
+                wordElement.classList.add('word');
+                wordElement.setAttribute('draggable', 'true');
+                wordElement.innerText = word;
+
+                wordElement.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text', e.target.innerText);
+                });
+
+                row2.appendChild(wordElement);
+            });
+
+            row1.addEventListener('dragover', (e) => e.preventDefault());
+            row1.addEventListener('drop', (e) => {
+                const word = e.dataTransfer.getData('text');
+                const wordElement = [...row2.children].find(
+                    (child) => child.innerText === word
+                );
+                if (wordElement) {
+                    wordElement.remove();
+                    row1.appendChild(wordElement);
+                }
+                checkCompletion();
+            });
+        }
+
+        function checkCompletion() {
+            const currentWords = [...row1.children].map(
+                (child) => child.innerText
+            );
+            const isCorrect =
+                JSON.stringify(currentWords) ===
+                JSON.stringify(tasks[currentLevel].sentence);
+
+            if (isCorrect && currentWords.length === tasks[currentLevel].sentence.length) {
+                nextButton.classList.remove('hidden');
+            }
+        }
+
+        nextButton.addEventListener('click', () => {
+            correctAnswers++;
+            currentLevel++;
+
+            if (currentLevel < tasks.length) {
+                nextButton.classList.add('hidden');
+                loadLevel(currentLevel);
+            } else {
+                endGame();
+            }
+        });
+
+        function endGame() {
+            row1.classList.add('hidden');
+            row2.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            result.innerText = `Эҕэрдэ! \n Түмүк: ${correctAnswers} / ${tasks.length}`;
+            result.classList.remove('hidden');
+        }
+
+        // Инициализация игры
+        loadLevel(currentLevel);
+    </script>
+</body>
+</html>
