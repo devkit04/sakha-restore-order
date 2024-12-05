@@ -12,7 +12,7 @@
             padding: 0;
         }
         .container {
-            background-image:url('./background-empty.png');
+            background-image:url('./background-boy-2.png');
             background-size:cover;
             background-position:center;
             display: flex;
@@ -77,8 +77,9 @@
 
         <div id="row_2" class="row"></div>
 
-        
         <button id="nextButton" class="button hidden">Салгыы</button>
+
+        <button id="tryAgainButton" class="hidden">Саҥаттаан</button>
         
         <h3 id="result" class="hidden"></h3>
 
@@ -168,81 +169,100 @@
             },
         ];
 
-        let currentLevel = 0;
-        let correctAnswers = 0;
+        let currentLevel = 17;
+let correctAnswers = 0;
 
-        const row1 = document.getElementById('row_1');
-        const row2 = document.getElementById('row_2');
-        const nextButton = document.getElementById('nextButton');
-        const result = document.getElementById('result');
+const row1 = document.getElementById('row_1');
+const row2 = document.getElementById('row_2');
+const nextButton = document.getElementById('nextButton');
+const result = document.getElementById('result');
+const tryAgainButton = document.getElementById('tryAgainButton'); // Добавляем кнопку для попытки снова
 
-        function loadLevel(level) {
-            row1.innerHTML = '';
-            row2.innerHTML = '';
+function loadLevel(level) {
+    row1.innerHTML = '';
+    row2.innerHTML = '';
 
-            const task = tasks[level];
-            task.shuffle.forEach((word) => {
-                const wordElement = document.createElement('div');
-                wordElement.classList.add('word');
-                wordElement.setAttribute('draggable', 'true');
-                wordElement.innerText = word;
+    const task = tasks[level];
+    task.shuffle.forEach((word) => {
+        const wordElement = document.createElement('div');
+        wordElement.classList.add('word');
+        wordElement.setAttribute('draggable', 'true');
+        wordElement.innerText = word;
 
-                wordElement.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text', e.target.innerText);
-                });
-
-                row2.appendChild(wordElement);
-            });
-
-            row1.addEventListener('dragover', (e) => e.preventDefault());
-            row1.addEventListener('drop', (e) => {
-                const word = e.dataTransfer.getData('text');
-                const wordElement = [...row2.children].find(
-                    (child) => child.innerText === word
-                );
-                if (wordElement) {
-                    wordElement.remove();
-                    row1.appendChild(wordElement);
-                }
-                checkCompletion();
-            });
-        }
-
-        function checkCompletion() {
-            const currentWords = [...row1.children].map(
-                (child) => child.innerText
-            );
-            const isCorrect =
-                JSON.stringify(currentWords) ===
-                JSON.stringify(tasks[currentLevel].sentence);
-
-            if (isCorrect && currentWords.length === tasks[currentLevel].sentence.length) {
-                nextButton.classList.remove('hidden');
-            }
-        }
-
-        nextButton.addEventListener('click', () => {
-            correctAnswers++;
-            currentLevel++;
-
-            if (currentLevel < tasks.length) {
-                nextButton.classList.add('hidden');
-                loadLevel(currentLevel);
-            } else {
-                endGame();
-            }
+        wordElement.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text', e.target.innerText);
         });
 
-        function endGame() {
-            row1.classList.add('hidden');
-            row2.classList.add('hidden');
-            nextButton.classList.add('hidden');
-            result.innerText = `Эҕэрдэ! \n Түмүк: ${correctAnswers} / ${tasks.length}`;
-            result.classList.remove('hidden');
-        }
+        row2.appendChild(wordElement);
+    });
 
-        // Инициализация игры
+    row1.addEventListener('dragover', (e) => e.preventDefault());
+    row1.addEventListener('drop', (e) => {
+        const word = e.dataTransfer.getData('text');
+        const wordElement = [...row2.children].find(
+            (child) => child.innerText === word
+        );
+        if (wordElement) {
+            wordElement.remove();
+            row1.appendChild(wordElement);
+        }
+        checkCompletion();
+    });
+}
+
+function checkCompletion() {
+    const currentWords = [...row1.children].map(
+        (child) => child.innerText
+    );
+    const isCorrect =
+        JSON.stringify(currentWords) ===
+        JSON.stringify(tasks[currentLevel].sentence);
+
+    if (isCorrect && currentWords.length === tasks[currentLevel].sentence.length) {
+        nextButton.classList.remove('hidden');
+    } else if (!isCorrect && currentWords.length === tasks[currentLevel].sentence.length) { // Проверяем, если ответ неправильный
+        showTryAgain(); // Показываем кнопку для повторной попытки
+    }
+}
+
+// Функция для отображения кнопки "Попробовать еще раз"
+function showTryAgain() {
+    tryAgainButton.classList.remove('hidden');
+}
+
+// Обработчик события нажатия на кнопку "Попробовать еще раз"
+tryAgainButton.addEventListener('click', () => {
+    resetLevel(); // Сбрасываем текущий уровень
+});
+
+// Функция для сброса текущего уровня
+function resetLevel() {
+    tryAgainButton.classList.add('hidden'); // Скрываем кнопку "Попробовать еще раз"
+    loadLevel(currentLevel); // Перезагружаем текущий уровень
+}
+
+nextButton.addEventListener('click', () => {
+    correctAnswers++;
+    currentLevel++;
+
+    if (currentLevel < tasks.length) {
+        nextButton.classList.add('hidden');
         loadLevel(currentLevel);
+    } else {
+        endGame();
+    }
+});
+
+function endGame() {
+    row1.classList.add('hidden');
+    row2.classList.add('hidden');
+    nextButton.classList.add('hidden');
+    result.innerText = `Эҕэрдэ! \n Түмүк: ${correctAnswers} / ${tasks.length}`;
+    result.classList.remove('hidden');
+}
+
+// Инициализация игры
+loadLevel(currentLevel);
     </script>
 </body>
 </html>
